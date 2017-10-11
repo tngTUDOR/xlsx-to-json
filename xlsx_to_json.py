@@ -37,19 +37,22 @@ def processsheet(workbook, sheet):
     return data
 
 
-def dumpdata(data, outputfile):
+def dumpdata(data, outputfile, indent):
     """ Dump the data into json format """
     with open(outputfile, 'w') as json_file:
-        json_file.write(json.dumps({'data': data}))
+        if indent:
+            json_file.write(json.dumps({'data': data}, indent=4))
+        else:
+            json_file.write(json.dumps({'data': data}))
 
-def processworkbook(inputfile, sheets, outputfile):
+def processworkbook(inputfile, sheets, outputfile, indent):
     """ dump each specified sheet of the inputfile """
     workbook = load_workbook(inputfile, read_only=True)
     for sheet in sheets:
         if outputfile == '':
             outputfile = "".join([os.path.splitext(os.path.basename(inputfile))[0], sheet, '.json'])
         jsondata = processsheet(workbook, sheet)
-        dumpdata(jsondata, outputfile)
+        dumpdata(jsondata, outputfile, indent)
 
 def showsheets(inputfile):
     """ Print the names of the sheets in the workbook"""
@@ -58,10 +61,10 @@ def showsheets(inputfile):
     print(workbook.sheetnames)
 
 @begin.start
-def main(inputfile, outputfile='', *sheet):
+def main(inputfile, outputfile='', indent=True, *sheet):
     """ run """
     assert (os.path.isfile(inputfile)), "Provided input file not found."
     if not sheet:
         showsheets(inputfile)
     else:
-        processworkbook(inputfile, sheet, outputfile)
+        processworkbook(inputfile, sheet, outputfile, indent)
